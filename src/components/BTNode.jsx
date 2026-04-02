@@ -17,7 +17,6 @@ const COLOR_STYLE = {
   blue: 'bg-blue-500',
   cyan: 'bg-cyan-500',
   slate: 'bg-slate-500',
-  white: 'bg-white',
 }
 
 export function BTNode({ type, data, selected }) {
