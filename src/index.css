@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import 'reactflow/dist/style.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-bt-bg text-slate-100 antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  #root {
+    @apply h-screen w-screen;
+  }
+}
+
+@layer components {
+  .react-flow__node {
+    @apply border-transparent bg-transparent shadow-none;
+  }
+
+  .react-flow__edge-path {
+    stroke: #3b82f6;
+    stroke-width: 2;
+  }
+
+  .react-flow__selection {
+    @apply border-2 border-blue-400/80 bg-blue-500/15;
+    border-style: dashed;
+  }
+
+  .bt-node-decorator {
+    clip-path: polygon(10% 0%, 90% 0%, 100% 28%, 100% 72%, 90% 100%, 10% 100%, 0% 72%, 0% 28%);
+  }
+
+  .react-flow__attribution {
+    @apply hidden;
+  }
+}
