@@ -7,7 +7,6 @@ const COLOR_PRESETS = [
   { key: 'blue', swatch: 'bg-blue-500 hover:bg-blue-400' },
   { key: 'cyan', swatch: 'bg-cyan-500 hover:bg-cyan-400' },
   { key: 'slate', swatch: 'bg-slate-500 hover:bg-slate-400' },
-  { key: 'white', swatch: 'bg-slate-100 hover:bg-white' },
 ]
 
 export function SelectionInspector({ selectedNodes, onColorChange, applyByType, onToggleApplyByType }) {
