@@ -12,8 +12,6 @@ const COLOR_PRESETS = [
 export function SelectionInspector({
   selectedNodes,
   onColorChange,
-  applyByType,
-  onToggleApplyByType,
   onNodeDataChange,
   blackboard = [],
   onCreateMacro,
@@ -110,7 +108,7 @@ export function SelectionInspector({
             </div>
           )}
 
-          {firstSelected.type === 'condition' && (
+          {(isLeaf || firstSelected.type === 'interrupt') && (
             <div className="rounded-lg border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-900/20 p-2">
               <label className="flex items-center gap-2 mb-2 text-xs font-bold text-indigo-700 dark:text-indigo-300">
                 <input 
@@ -119,10 +117,10 @@ export function SelectionInspector({
                   onChange={(e) => onNodeDataChange(firstSelected.id, 'useBlackboard', e.target.checked)}
                   className="rounded border-indigo-300 dark:border-indigo-500 bg-white dark:bg-slate-800 text-indigo-500 focus:ring-indigo-500"
                 />
-                Use Blackboard Variable
+                Use Blackboard Condition
               </label>
 
-              {firstSelected.data.useBlackboard ? (
+              {firstSelected.data.useBlackboard && (
                 <div className="flex flex-col gap-2">
                   <select
                     className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-200 rounded p-1 outline-none focus:border-indigo-400"
@@ -157,24 +155,11 @@ export function SelectionInspector({
                     />
                   </div>
                 </div>
-              ) : (
-                <div>
-                  <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Expected Output</p>
-                  <select
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-200 rounded p-1 outline-none focus:border-cyan-500"
-                    value={firstSelected.data.expectedOutput ?? 'SUCCESS'}
-                    onChange={(e) => onNodeDataChange(firstSelected.id, 'expectedOutput', e.target.value)}
-                  >
-                    <option value="SUCCESS">Success</option>
-                    <option value="FAILURE">Failure</option>
-                    <option value="RUNNING">Running</option>
-                  </select>
-                </div>
               )}
             </div>
           )}
           
-          {isLeaf && firstSelected.type !== 'condition' && firstSelected.type !== 'subtree' && (
+          {isLeaf && firstSelected.type !== 'subtree' && !firstSelected.data.useBlackboard && (
             <div>
               <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Expected Output</p>
               <select
@@ -193,6 +178,27 @@ export function SelectionInspector({
             <div>
               <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Wait Duration (ms)</p>
               <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-200 rounded p-1 outline-none focus:border-cyan-500" value={firstSelected.data.waitDuration ?? 1000} onChange={(e) => onNodeDataChange(firstSelected.id, 'waitDuration', e.target.value)} />
+            </div>
+          )}
+
+          {(firstSelected.type === 'action' || firstSelected.type === 'wait') && (
+            <div className="mt-2 border-t border-slate-200 dark:border-slate-700 pt-3">
+              <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Reads From (BB Keys)</p>
+              <input
+                type="text"
+                className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 text-sm text-slate-800 dark:text-white rounded p-1.5 outline-none focus:border-cyan-500 transition-colors"
+                value={firstSelected.data.readsFrom || ''}
+                onChange={(e) => onNodeDataChange(firstSelected.id, 'readsFrom', e.target.value)}
+                placeholder="e.g. target_hp, enemy_pos"
+              />
+              <p className="mt-3 mb-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Writes To (BB Keys)</p>
+              <input
+                type="text"
+                className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 text-sm text-slate-800 dark:text-white rounded p-1.5 outline-none focus:border-cyan-500 transition-colors"
+                value={firstSelected.data.writesTo || ''}
+                onChange={(e) => onNodeDataChange(firstSelected.id, 'writesTo', e.target.value)}
+                placeholder="e.g. is_alerted, patrol_point"
+              />
             </div>
           )}
 
@@ -223,18 +229,6 @@ export function SelectionInspector({
           )}
 
         </div>
-      )}
-
-      {!showGroupLabel && !isRoot && firstSelected.type !== 'custom' && (
-        <label className="mt-4 flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300 transition hover:text-slate-900 dark:hover:text-white">
-          <input
-            type="checkbox"
-            className="rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-cyan-600 dark:text-cyan-500 focus:ring-cyan-500"
-            checked={applyByType}
-            onChange={(e) => onToggleApplyByType(e.target.checked)}
-          />
-          Apply to all {firstSelected.data.label}s
-        </label>
       )}
 
       {firstSelected.type === 'interrupt' && (
