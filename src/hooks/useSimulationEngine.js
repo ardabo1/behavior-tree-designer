@@ -13,11 +13,14 @@ export function useSimulationEngine({
   const tickSpeedRef = useRef(tickSpeedMs)
   const [isPlaying, setIsPlaying] = useState(false)
   const [logs, setLogs] = useState([])
+  const logEndRef = useRef(null)
 
   // Keep ref in sync with state for access inside async loops without stale closures
   useEffect(() => {
     tickSpeedRef.current = tickSpeedMs
   }, [tickSpeedMs])
+
+  
 
   const addLog = useCallback((msg, type = 'INFO') => {
     setLogs(prev => [...prev, { id: Date.now() + Math.random(), time: new Date().toLocaleTimeString('en-US', { hour12: false }), msg, type }])
