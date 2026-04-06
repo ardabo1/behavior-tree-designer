@@ -50,14 +50,6 @@ A professional, web-based visual editor for designing and exporting Behavior Tre
 ```bash
    npm run dev
 ```
-
-### Deployment
-
-To deploy your own version to GitHub Pages:
-```bash
-npm run deploy
-```
-
 ---
 
 ## ⌨️ Controls & Shortcuts
