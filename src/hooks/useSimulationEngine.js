@@ -31,7 +31,9 @@ export function useSimulationEngine({
     setEdges((prev) => prev.map((e) => ({ ...e, data: { ...e.data, activeTick: false } })))
   }, [setEdges, setNodes])
 
-  const runSimulation = useCallback(async () => {
+  // SADECE BU İKİ FONKSİYONU DEĞİŞTİR:
+
+  const runSimulation = useCallback(async (startNodeId = null) => {
     simRef.current.stopped = false
     simRef.current.paused = false
     simRef.current.running = true
@@ -72,18 +74,13 @@ export function useSimulationEngine({
       setEdges((prev) => prev.map((e) => e.id === edge.id ? { ...e, data: { ...e.data, activeTick: false } } : e))
     }
 
-    // Helper function for safe blackboard evaluation
     const evaluateBlackboard = (data) => {
       if (!data.bbKey) return false;
-
       const bbVar = blackboardRef.current.find(b => b.key === data.bbKey)
-      
       let val1 = bbVar ? String(bbVar.value) : ''
       let val2 = data.bbValue ? String(data.bbValue) : ''
-      
       const num1 = Number(val1)
       const num2 = Number(val2)
-      
       const isNum = !isNaN(num1) && !isNaN(num2) && val1.trim() !== '' && val2.trim() !== ''
       
       if (isNum) {
@@ -106,6 +103,7 @@ export function useSimulationEngine({
     }
 
     const evaluateNode = async (nodeId, signal = null) => {
+      // ... (BU KISIM TAMAMEN AYNI, KODUNU ELLEME)
       if (simRef.current.stopped || signal?.aborted) throw new Error('ABORTED')
       while (simRef.current.paused && !simRef.current.stopped) await new Promise((r) => setTimeout(r, 40))
       
@@ -161,7 +159,6 @@ export function useSimulationEngine({
              addLog(`[Subtree: ${data.label}] Returned SUCCESS from ${targetProj.name}`, 'SUCCESS')
           }
         }
-        // COMPOSITE NODES
         else if (nType === 'sequence') {
           for (const { node: child } of childrenTuples) {
             await pulseEdge(nodeId, child.id, signal)
@@ -190,7 +187,6 @@ export function useSimulationEngine({
             else result = 'SUCCESS'
           }
         }
-        // DECORATOR NODES
         else if (nType === 'timeout') {
           const child = childrenTuples[0]?.node
           if (!child) result = 'SUCCESS'
@@ -291,7 +287,6 @@ export function useSimulationEngine({
           if (!child) result = 'FAILURE'
           else { await pulseEdge(nodeId, child.id, signal); const r = await evaluateNode(child.id, signal); result = r === 'RUNNING' ? 'RUNNING' : 'FAILURE' }
         }
-        // LEAF FALLBACK
         else if (nType === 'condition' || nType === 'action' || nKind === 'leaf') { 
           if (data.useBlackboard && data.bbKey) {
             result = evaluateBlackboard(data) ? 'SUCCESS' : 'FAILURE'
@@ -314,10 +309,20 @@ export function useSimulationEngine({
     }
 
     try {
-      const rootNode = nodesRef.current.find(n => n.type === 'root')
-      if (rootNode) {
-        const finalStatus = await evaluateNode(rootNode.id)
+      // YENİ: Başlangıç noktasını dinamik seçiyoruz
+      let startingNode = null;
+      if (startNodeId) {
+         startingNode = nodesRef.current.find(n => n.id === startNodeId)
+         addLog(`[Branch Mode] Starting from: ${startingNode?.data.label}`, 'INFO')
+      } else {
+         startingNode = nodesRef.current.find(n => n.type === 'root')
+      }
+
+      if (startingNode) {
+        const finalStatus = await evaluateNode(startingNode.id)
         addLog(`Simulation Finished: ${finalStatus}`, finalStatus)
+      } else {
+        addLog(`Simulation Failed: Target node not found!`, 'FAILURE')
       }
     } catch (e) {
       if (e.message !== 'ABORTED') console.error("Simulation error:", e)
@@ -327,13 +332,13 @@ export function useSimulationEngine({
     }
   }, [resetSimulationVisuals, setEdges, setNodes, addLog, blackboardRef, edgesRef, nodesRef, projectsRef, tickSpeedRef])
 
-  const handlePlayPause = useCallback(() => {
+  const handlePlayPause = useCallback((startNodeId = null) => {
     if (simRef.current.running) {
       simRef.current.paused = !simRef.current.paused
       setIsPlaying(!simRef.current.paused)
       addLog(simRef.current.paused ? 'Simulation Paused' : 'Simulation Resumed', 'INFO')
     } else {
-      void runSimulation()
+      void runSimulation(startNodeId) // StartId buraya paslanıyor
     }
   }, [runSimulation, addLog])
 

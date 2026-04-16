@@ -1,13 +1,22 @@
 import React from 'react'
-import { Terminal, Database, Plus, Trash2 } from 'lucide-react'
+import { Terminal, Database, Plus, Trash2, ChevronsRight, ChevronsLeft } from 'lucide-react'
 
 export function RightSidebar({
-  logs,
-  logEndRef,
-  blackboard,
-  setBlackboard,
-  handleBlackboardUpdate
+  isRightOpen,
+  setIsRightOpen,
+  logs, logEndRef, blackboard, setBlackboard, handleBlackboardUpdate
 }) {
+  
+  if (!isRightOpen) {
+    return (
+      <div className="absolute top-4 right-4 z-50">
+        <button onClick={() => setIsRightOpen(true)} className="p-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-300 hover:text-cyan-400 shadow-xl transition-all hover:scale-105" title="Open Logs">
+          <ChevronsLeft className="h-5 w-5" />
+        </button>
+      </div>
+    )
+  }
+
   const getLogColor = (type) => {
     if (type === 'SUCCESS') return 'text-green-600 dark:text-green-400'
     if (type === 'FAILURE') return 'text-red-600 dark:text-red-400'
@@ -18,9 +27,14 @@ export function RightSidebar({
 
   return (
     <aside className="z-10 flex w-80 flex-col border-l border-slate-300 dark:border-blue-900/60 bg-white/90 dark:bg-slate-900/80 shadow-xl">
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 p-4 shrink-0">
-        <Terminal className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Simulation Logs</h2>
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 p-4 shrink-0">
+        <div className="flex items-center gap-2">
+           <Terminal className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+           <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Simulation Logs</h2>
+        </div>
+        <button onClick={() => setIsRightOpen(false)} className="text-slate-400 hover:text-cyan-400 transition-colors" title="Hide Sidebar">
+           <ChevronsRight className="h-4 w-4" />
+        </button>
       </div>
       
       <div className="flex-1 overflow-y-auto p-3 font-mono text-[11px] leading-relaxed">
@@ -47,21 +61,9 @@ export function RightSidebar({
           )}
           {blackboard.map((v) => (
             <div key={v.id} className="flex items-center gap-1">
-              <input 
-                type="text" 
-                className="w-1/2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-indigo-500" 
-                value={v.key} 
-                onChange={(e) => handleBlackboardUpdate(v.id, 'key', e.target.value)} 
-                placeholder="Key" 
-              />
+              <input type="text" className="w-1/2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-indigo-500" value={v.key} onChange={(e) => handleBlackboardUpdate(v.id, 'key', e.target.value)} placeholder="Key" />
               <span className="text-slate-500">=</span>
-              <input 
-                type="text" 
-                className="w-1/3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-indigo-500" 
-                value={v.value} 
-                onChange={(e) => handleBlackboardUpdate(v.id, 'value', e.target.value)} 
-                placeholder="Value" 
-              />
+              <input type="text" className="w-1/3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-indigo-500" value={v.value} onChange={(e) => handleBlackboardUpdate(v.id, 'value', e.target.value)} placeholder="Value" />
               <button onClick={() => setBlackboard(b => b.filter(item => item.id !== v.id))} className="p-1 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"><Trash2 className="h-4 w-4" /></button>
             </div>
           ))}

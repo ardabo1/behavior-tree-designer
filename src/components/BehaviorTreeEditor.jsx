@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import ReactFlow, { Background, ConnectionMode, MarkerType, MiniMap, Panel, SelectionMode } from 'reactflow'
 import 'reactflow/dist/style.css'
 
@@ -7,7 +7,7 @@ import { SelectionInspector } from './SelectionInspector'
 import { TickEdge } from './TickEdge'
 import { NODE_LIBRARY } from '../lib/nodeLibrary'
 
-// Kendi yazdığımız Custom Hook'lar (Yolların doğru olduğundan emin ol)
+// Kendi yazdığımız Custom Hook'lar (Yolların projene uygun olduğundan emin ol)
 import { useModal } from '../hooks/useModal'
 import { useEditorLogic } from '../hooks/useEditorLogic'
 import { useSimulationEngine } from '../hooks/useSimulationEngine'
@@ -36,6 +36,10 @@ export function BehaviorTreeEditor() {
     setEdges: logic.setEdges
   })
 
+  // Yan panellerin açık/kapalı durumu
+  const [isLeftOpen, setIsLeftOpen] = useState(true)
+  const [isRightOpen, setIsRightOpen] = useState(true)
+
   // ReactFlow için Node ve Edge tanımlamaları
   const edgeTypes = useMemo(() => ({ tick: TickEdge }), [])
   const nodeTypes = useMemo(() => {
@@ -56,7 +60,7 @@ export function BehaviorTreeEditor() {
       <SearchModal {...logic} />
 
       {/* Sol Menü: Projeler & Kütüphane */}
-      <LeftSidebar {...logic} />
+      <LeftSidebar {...logic} isLeftOpen={isLeftOpen} setIsLeftOpen={setIsLeftOpen} />
 
       {/* Ana Tuval (Canvas) */}
       <main ref={logic.wrapperRef} className="relative h-full flex-1" onDragOver={logic.onDragOver} onDrop={logic.onDrop}>
@@ -71,7 +75,8 @@ export function BehaviorTreeEditor() {
         >
           <Background color="#1e293b" gap={24} size={1.5} />
           
-          <TopSimulationBar {...engine} />
+          {/* Üst Simülasyon Kontrol Çubuğu */}
+          <TopSimulationBar {...engine} selectedNodes={selectedNodes} />
 
           {selectedNodes.length > 0 && (
             <Panel position="bottom-left" className="mb-4 ml-24">
@@ -94,6 +99,8 @@ export function BehaviorTreeEditor() {
         blackboard={logic.blackboard} 
         setBlackboard={logic.setBlackboard} 
         handleBlackboardUpdate={logic.handleBlackboardUpdate} 
+        isRightOpen={isRightOpen} 
+        setIsRightOpen={setIsRightOpen}
       />
       
     </div>

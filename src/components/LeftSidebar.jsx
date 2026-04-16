@@ -1,31 +1,36 @@
 import React from 'react'
-import { Search, FolderPlus, Edit2, Trash2, Package, Download, Upload, Camera } from 'lucide-react'
+import { Search, FolderPlus, Edit2, Trash2, Package, Download, Upload, Camera, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { NODE_CATEGORIES } from '../lib/nodeLibrary'
 
 export function LeftSidebar({
-  projects,
-  currentProjectId,
-  setCurrentProjectId,
-  handleNewProject,
-  handleRenameProject,
-  handleDeleteProject,
-  setIsSearchOpen,
-  searchInputRef,
-  macros,
-  handleDeleteMacro,
-  onDragStart,
-  addNodeFromSidebar,
-  handleExportJSON,
-  triggerFileInput,
-  fileInputRef,
-  handleImportJSON,
-  handleExportPNG,
-  handleClearBoard
+  isLeftOpen,
+  setIsLeftOpen,
+  projects, currentProjectId, setCurrentProjectId,
+  handleNewProject, handleRenameProject, handleDeleteProject,
+  setIsSearchOpen, searchInputRef, macros, handleDeleteMacro,
+  onDragStart, addNodeFromSidebar, handleExportJSON,
+  triggerFileInput, fileInputRef, handleImportJSON, handleExportPNG, handleClearBoard
 }) {
+  
+  if (!isLeftOpen) {
+    return (
+      <div className="absolute top-4 left-4 z-50">
+        <button onClick={() => setIsLeftOpen(true)} className="p-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-300 hover:text-cyan-400 shadow-xl transition-all hover:scale-105" title="Open Library">
+          <ChevronsRight className="h-5 w-5" />
+        </button>
+      </div>
+    )
+  }
+
   return (
     <aside className="z-10 flex w-72 flex-col border-r border-slate-300 dark:border-blue-900/60 bg-white/90 dark:bg-slate-900/80 p-4 shadow-xl">
       <div className="mb-4 flex flex-col gap-2 border-b border-slate-200 dark:border-slate-700 pb-4">
-        <h1 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Current Project</h1>
+        <div className="flex justify-between items-center">
+           <h1 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Current Project</h1>
+           <button onClick={() => setIsLeftOpen(false)} className="text-slate-400 hover:text-cyan-400 transition-colors" title="Hide Sidebar">
+              <ChevronsLeft className="h-4 w-4" />
+           </button>
+        </div>
         <div className="flex gap-1">
           <select
             className="min-w-0 flex-1 truncate bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded p-1.5 text-xs text-slate-800 dark:text-white outline-none focus:border-cyan-500"
@@ -55,27 +60,12 @@ export function LeftSidebar({
               <p className="text-xs text-purple-400 dark:text-purple-300/50 text-center py-2">No macros yet.</p>
             ) : (
               macros.map((macro) => (
-                <div
-                  key={macro.id}
-                  draggable
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData('application/reactflow-macro', JSON.stringify(macro))
-                    e.dataTransfer.effectAllowed = 'move'
-                  }}
-                  className="group/macro flex w-full cursor-grab active:cursor-grabbing items-center justify-between rounded-lg border border-purple-300 dark:border-purple-800/50 bg-purple-100 dark:bg-purple-900/40 px-3 py-2 text-left text-sm transition hover:border-purple-500 dark:hover:border-purple-400"
-                >
+                <div key={macro.id} draggable onDragStart={(e) => { e.dataTransfer.setData('application/reactflow-macro', JSON.stringify(macro)); e.dataTransfer.effectAllowed = 'move'; }} className="group/macro flex w-full cursor-grab active:cursor-grabbing items-center justify-between rounded-lg border border-purple-300 dark:border-purple-800/50 bg-purple-100 dark:bg-purple-900/40 px-3 py-2 text-left text-sm transition hover:border-purple-500 dark:hover:border-purple-400">
                   <div className="flex flex-1 items-center gap-2 pointer-events-none">
                     <Package className="h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" />
                     <span className="font-medium text-purple-800 dark:text-purple-100 truncate">{macro.name}</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={(e) => handleDeleteMacro(macro.id, e)}
-                    className="p-1 text-purple-400 hover:text-red-500 dark:text-purple-400/40 dark:hover:text-red-400 transition-all opacity-0 group-hover/macro:opacity-100"
-                    title="Delete Macro"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <button type="button" onClick={(e) => handleDeleteMacro(macro.id, e)} className="p-1 text-purple-400 hover:text-red-500 dark:text-purple-400/40 dark:hover:text-red-400 transition-all opacity-0 group-hover/macro:opacity-100" title="Delete Macro"><Trash2 className="h-4 w-4" /></button>
                 </div>
               ))
             )}
